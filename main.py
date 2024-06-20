@@ -39,9 +39,13 @@ if __name__=="__main__":
     for url in urls:
         videos.append(VideoFile(url))
     
-    parallel_video_downloader(videos)
-    parallel_audio_extractor(videos)
+    parallel_video_downloader(videos,5)
+    parallel_audio_extractor(videos,1)
     parallel_audio_transcriber(videos)
+    parallel_sentiment_analyser(videos)
+    parallel_text_translator(videos, 'en','es','Spanish')
+    parallel_emotion_extractor(videos)
+
 
     # for video in videos:
         # video.to_string()

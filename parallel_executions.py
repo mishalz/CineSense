@@ -4,6 +4,7 @@ import time
 # <-------------------------------- Helper Function ------------------------------->
 
 def parallel_downloader_helper(videos,thread_builder,descriptive_text):
+    
     threads=[]
     start=time.perf_counter()
     for i,video in enumerate(videos):
@@ -20,7 +21,7 @@ def parallel_downloader_helper(videos,thread_builder,descriptive_text):
 
 # <-------------------------------- Parallel Functions ------------------------------->
 
-def parallel_video_downloader(videos):
+def parallel_video_downloader(videos,max_no_of_threads = None):
     """
     Parameters:
         filepath: the file containing the URLs of youtube videos
@@ -28,7 +29,9 @@ def parallel_video_downloader(videos):
     Returns:
         urls: A list of strings containing the URLs
     """
-    semaphore = threading.Semaphore(5)
+    if(max_no_of_threads == None):
+        max_no_of_threads = len(videos)
+    semaphore = threading.Semaphore(max_no_of_threads)
 
     def thread_builder(video,index):
         thread = threading.Thread(target=video.download_video,args=(semaphore,index))
@@ -53,7 +56,7 @@ def parallel_video_downloader_and_logger(filename,videos):
 
     parallel_downloader_helper(videos,thread_builder,'download and log')
   
-def parallel_audio_extractor(videos):
+def parallel_audio_extractor(videos,max_no_of_threads = None):
     """
     Parameters:
         filepath: the file containing the URLs of youtube videos
@@ -61,14 +64,17 @@ def parallel_audio_extractor(videos):
     Returns:
         urls: A list of strings containing the URLs
     """
+    if(max_no_of_threads == None):
+        max_no_of_threads = len(videos)
+    semaphore = threading.Semaphore(max_no_of_threads)
     def thread_builder(video,index):
-        thread = threading.Thread(target=video.extract_audio,args=[index])
+        thread = threading.Thread(target=video.extract_audio,args=(index,semaphore))
         return thread
 
     parallel_downloader_helper(videos,thread_builder,'extract audio from')
 
       
-def parallel_audio_transcriber(videos):
+def parallel_audio_transcriber(videos,max_no_of_threads=None):
     """
     Parameters:
         filepath: the file containing the URLs of youtube videos
@@ -76,13 +82,17 @@ def parallel_audio_transcriber(videos):
     Returns:
         urls: A list of strings containing the URLs
     """
+    if(max_no_of_threads == None):
+        max_no_of_threads = len(videos)
+
+    semaphore = threading.Semaphore(max_no_of_threads)
     def thread_builder(video,index):
-        thread = threading.Thread(target=video.transcribe_audio,args=[index])
+        thread = threading.Thread(target=video.transcribe_audio,args=(index,semaphore))
         return thread
 
     parallel_downloader_helper(videos,thread_builder,'transcribe audio from')
       
-def parallel_sentiment_analyser(videos):
+def parallel_sentiment_analyser(videos, max_no_of_threads = None):
     """
     Parameters:
         filepath: the file containing the URLs of youtube videos
@@ -90,13 +100,17 @@ def parallel_sentiment_analyser(videos):
     Returns:
         urls: A list of strings containing the URLs
     """
+    if(max_no_of_threads == None):
+        max_no_of_threads = len(videos)
+    semaphore = threading.Semaphore(max_no_of_threads)
+
     def thread_builder(video,index):
-        thread = threading.Thread(target=video.sentiment_analysis,args=[index])
+        thread = threading.Thread(target=video.sentiment_analysis,args=(index,semaphore))
         return thread
 
     parallel_downloader_helper(videos,thread_builder,'perform sentiment analysis on')
       
-def parallel_text_translator(videos, lang_from, lang_to, lang_name):
+def parallel_text_translator(videos, lang_from, lang_to, lang_name, max_no_of_threads=None):
     """
     Parameters:
         filepath: the file containing the URLs of youtube videos
@@ -104,13 +118,18 @@ def parallel_text_translator(videos, lang_from, lang_to, lang_name):
     Returns:
         urls: A list of strings containing the URLs
     """
+    if(max_no_of_threads == None):
+        max_no_of_threads = len(videos)
+    
+    semaphore = threading.Semaphore(max_no_of_threads)
+
     def thread_builder(video,index):
-        thread = threading.Thread(target=video.translate_text,args=(index, lang_from, lang_to, lang_name))
+        thread = threading.Thread(target=video.translate_text,args=(index, lang_from, lang_to, lang_name,semaphore))
         return thread
 
     parallel_downloader_helper(videos,thread_builder,f'translate in {lang_name}')
       
-def parallel_emotion_extractor(videos):
+def parallel_emotion_extractor(videos,max_no_of_threads =None):
     """
     Parameters:
         filepath: the file containing the URLs of youtube videos
@@ -118,8 +137,13 @@ def parallel_emotion_extractor(videos):
     Returns:
         urls: A list of strings containing the URLs
     """
+    if(max_no_of_threads == None):
+        max_no_of_threads = len(videos)
+
+    semaphore = threading.Semaphore(max_no_of_threads)
+
     def thread_builder(video,index):
-        thread = threading.Thread(target=video.translate_text,args=[index])
+        thread = threading.Thread(target=video.extract_emotions,args=(index, semaphore))
         return thread
 
     parallel_downloader_helper(videos,thread_builder,'extract emotion from')
