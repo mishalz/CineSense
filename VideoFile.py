@@ -49,7 +49,7 @@ class VideoFile:
 
         Parameters:
             data_folder: the folder name where the videos will be stored, each in their own folder.
-            semaphore [optional] = to restrict the number of videos to be downloaded at a time.
+            semaphore [optional]: to restrict the number of videos to be downloaded at a time.
             
         Returns:
             None
@@ -74,7 +74,6 @@ class VideoFile:
         finally:
             if(semaphore!=None):
                 semaphore.release()
-
 
     def download_video_and_log(self, filename, data_folder, lock, thread_id) -> None:
         """
@@ -113,7 +112,7 @@ class VideoFile:
         Extracts the audio from the video file and saves it into a .wav file.
 
         Parameters:
-            semaphore [optional] = to restrict the number of audios to be extracted at a time.
+            semaphore [optional]: to restrict the number of audios to be extracted at a time.
 
         Returns:
             None
@@ -141,7 +140,7 @@ class VideoFile:
         Extracts the text from the audio file and saves it into a .txt file.
 
         Parameters:
-            semaphore = to restrict the number of audios to be transcribed at a time.
+            semaphore: to restrict the number of audios to be transcribed at a time.
             
         Returns:
             None
@@ -174,7 +173,7 @@ class VideoFile:
         Performs Sentiment Analysis on the video and saves the polarity and subjectivity measure of the content, into a .txt file.
 
         Parameters:
-            semaphore = to restrict the number of audios to be transcribed at a time.
+            semaphore: to restrict the number of audios to be transcribed at a time.
             
         Returns:
             None
@@ -212,7 +211,7 @@ class VideoFile:
             lang_from: The original language of the text.
             lang_to: The language to translate the text into.
             lang_to_name: The name in English of the language that the text is to be translated into.    
-            semaphore = to restrict the number of texts to be translated at a time.
+            semaphore: to restrict the number of texts to be translated at a time.
 
         Returns:
             None
@@ -244,7 +243,7 @@ class VideoFile:
         Extracts the emotions from the transcribed .txt file of the video and saves it in a separate .txt file.
 
         Parameters:
-            semaphore = to restrict the number of videos that are processed at a time, for emotion extraction.    
+            semaphore: to restrict the number of videos that are processed at a time, for emotion extraction.    
             
         Returns:
             None
@@ -276,7 +275,6 @@ class VideoFile:
             semaphore.release() 
         
 
-
 # <-------------------------------- Helper Functions ------------------------------->
 
     def save_to_file(self,filename,mode,text) -> None:
@@ -294,7 +292,6 @@ class VideoFile:
         with open(filename, mode) as file:
             file.write(text)
         print(f'Text has been written to {filename}')
-
 
     def get_text_from_file(self) -> str:
         """
