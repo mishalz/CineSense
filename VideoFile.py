@@ -17,9 +17,9 @@ class VideoFile:
 
     def __init__(self, url) -> None:
         """
-        Initialised the VideoFile object with attributes: URL, title, path where the video is downloaded, path of the file with the extracted audio
-        subtitles of the video, path of the text file where the subtitles of the video are stored, path of the file where the translated 
-        text of the video is stored, sentiments of the Video.
+        Initialised the VideoFile object with attributes: URL, title, path where the video is downloaded, path of the file with the 
+        extracted audio subtitles of the video, path of the text file where the subtitles of the video are stored, path of the file 
+        where the translated text of the video is stored, sentiments of the Video.
 
         Parameters:
             url: The Youtube URL of the video
@@ -28,28 +28,32 @@ class VideoFile:
             None
             
         """
-        self.url=url
-        self.title=None
-        self.filename=None
-        self.folder_name=None
-        self.video_path=None
-        self.audio_path=None
-        self.subtitles=None
-        self.text_path=None
-        self.translated_text_path=None
+        self.url = url
+        self.title = None
+        self.filename = None
+        self.folder_name = None
+        self.video_path = None
+        self.audio_path = None
+        self.subtitles = None
+        self.text_path = None
+        self.translated_text_path = None
+        self.sentiments_path = None
+        self.emotions_path = None
         self.sentiment = {}
  
  # <-------------------------------- Video Downloading Functions ------------------------------->
 
-    def download_video(self, data_folder,semaphore=None) -> None:
+    def download_video(self, data_folder,semaphore = None) -> None:
         """
-        Downloads a video from YouTube
+        Downloads a video from YouTube.
 
         Parameters:
-            output_folder: the folder name where the 
+            data_folder: the folder name where the videos will be stored, each in their own folder.
+            semaphore [optional] = to restrict the number of videos to be downloaded at a time.
             
         Returns:
-            
+            None
+
         """
         if(semaphore!=None):
             semaphore.acquire()
@@ -62,15 +66,17 @@ class VideoFile:
             print(f"Downloading video titled: {self.title}")
             self.video_path = stream.download(output_path=self.folder_name, filename=self.filename+'.mp4')
             print(f"SUCCESSFULL - Download completed to: {self.video_path}")
+
         except Exception as e: 
             print(f"UNSUCCESSFUL - failed to complete downloading video from {self.url}")
             print(e)
+
         finally:
             if(semaphore!=None):
                 semaphore.release()
 
 
-    def download_video_and_log(self, filename, lock, thread_id) -> None:
+    def download_video_and_log(self, filename, data_folder, lock, thread_id) -> None:
         """
         Downloads a video from YouTube and logs the activity in the logger file.
 
@@ -85,14 +91,16 @@ class VideoFile:
         lock.acquire()
         try:
             print(f"DOWNLOADING :: Thread {thread_id} acquired a lock.")
-            self.download_video()
+            self.download_video(data_folder) #calls the base download function
 
             self.log= f'"Timestamp": {time.strftime("%H:%M, %d %b %Y", time.gmtime())}, "URL":"{self.url}", "Download":True, "Thread ID": {thread_id}\n'
             self.save_to_file(filename,'a', self.log)
             print(f"SUCCESSFUL - Thread {thread_id} completed downloading and logging the video {self.title}.")
+
         except Exception as e: 
-            print(f"UNSUCCESSFUL - Thread {thread_id} could not complete downloading and video {self.title}.")
+            print(f"UNSUCCESSFUL - Thread {thread_id} could not complete downloading and logging the video {self.title}.")
             print(e)
+
         finally:
             lock.release()
             print(f"DOWNLOADING :: Thread {thread_id} released a lock.")
@@ -105,7 +113,7 @@ class VideoFile:
         Extracts the audio from the video file and saves it into a .wav file.
 
         Parameters:
-            None
+            semaphore [optional] = to restrict the number of audios to be extracted at a time.
 
         Returns:
             None
@@ -114,14 +122,16 @@ class VideoFile:
             semaphore.acquire()
         try:
             self.audio_path = os.path.join(self.folder_name, self.filename + ".wav")
+
             print(f"SUBTASK 1 :: Starting extraction of the audio from file {self.title}")
             video = moviepy.editor.VideoFileClip(self.video_path)
             video.audio.write_audiofile(self.audio_path)
             print(f"SUBTASK 1 :: extraction completed {self.title}")
-            print(f"SUCCESSFUL - completed extracting audio from file{self.title}.")
+
         except Exception as e: 
              print(f"UNSUCCESSFUL - failed to extract audio from file {self.title}.")
              print(e)
+
         finally:
             if(semaphore != None):
                 semaphore.release()
@@ -131,7 +141,7 @@ class VideoFile:
         Extracts the text from the audio file and saves it into a .txt file.
 
         Parameters:
-            None    
+            semaphore = to restrict the number of audios to be transcribed at a time.
             
         Returns:
             None
@@ -140,39 +150,51 @@ class VideoFile:
         semaphore.acquire()
         try:
             print(f"SUBTASK 2 :: started transcribing audio from file {self.audio_path} to text")
+
             recognizer = sr.Recognizer()
             with sr.AudioFile(self.audio_path) as source:
                 audio = recognizer.record(source)
             self.subtitles = recognizer.recognize_google(audio)
             self.text_path = os.path.join(self.folder_name, self.filename + ".txt")
+
             print(f"SUBTASK 2 :: Saving the text to file: {self.text_path}")
             self.save_to_file(self.text_path,'w',self.subtitles)
+
             print(f"SUCCESSFUL -  completed transcribing audio from file{self.title}.")
+
         except Exception as e: 
             print(f"UNSUCCESSFUL - failed to not transcribe audio from file {self.title}.")
             print(e)
+
         finally:
             semaphore.release()   
 
     def sentiment_analysis(self,semaphore) -> None:
         """
-        Performs Sentiment Analysis on the video and prints out the polarity and subjectivity measure of the content.
+        Performs Sentiment Analysis on the video and saves the polarity and subjectivity measure of the content, into a .txt file.
 
         Parameters:
-            None    
+            semaphore = to restrict the number of audios to be transcribed at a time.
             
         Returns:
             None
             
         """
         semaphore.acquire()
+
         try:
             print(f"SUBTASK 3 :: started sentiment analysis on file {self.title}")
+
             text_to_analyse = self.get_text_from_file()
             blob = TextBlob(text_to_analyse)
             self.sentiment = blob.sentiment
-            print(f"Polarity measure of the video {self.title} is: {self.sentiment.polarity}")
-            print(f"Subjectivity measure of the video {self.title} is: {self.sentiment.subjectivity}")
+            sentiments_output = f"Polarity measure of the video {self.title} is: {self.sentiment.polarity}\nSubjectivity measure of the video {self.title} is: {self.sentiment.subjectivity}"
+            print(sentiments_output)
+
+            self.sentiments_path = os.path.join(self.folder_name, self.filename + "_sentiments.txt")
+            print(f"SUBTASK 3 :: saving the sentiments to file: {self.sentiments_path}")
+            self.save_to_file(self.sentiments_path,'w',sentiments_output)
+
             print(f"SUCCESSFUL - completed sentiment analysis on file {self.title}.")
 
         except Exception as e: 
@@ -184,56 +206,72 @@ class VideoFile:
 
     def translate_text(self, lang_from, lang_to, lang_to_name, semaphore) -> None:
         """
-        Translates the transcribed text into a given language.
+        Translates the transcribed text into a given language and saves it in a .txt file.
 
         Parameters:
             lang_from: The original language of the text.
             lang_to: The language to translate the text into.
             lang_to_name: The name in English of the language that the text is to be translated into.    
-            
+            semaphore = to restrict the number of texts to be translated at a time.
+
         Returns:
             None
             
         """
-        print(f"SUBTASK 4 :: started translating the video {self.title} to {lang_to_name}")
         semaphore.acquire()
+
         try:
+            print(f"SUBTASK 4 :: started translating the video {self.title} to {lang_to_name}")
+
             text_to_analyse = self.get_text_from_file()
             text_translated = GoogleTranslator(source=lang_from, target=lang_to).translate(text=text_to_analyse)
             self.translated_text_path = os.path.join(self.folder_name, self.filename + "_"+lang_to_name+".txt")
+
             print(f"SUBTASK 4 :: saving the translated text to file: {self.translated_text_path}")
             self.save_to_file(self.translated_text_path,'w',text_translated)
+
             print(f"SUCCESSFUL - completed translation of the video {self.title}.")
+
         except Exception as e: 
             print(f"UNSUCCESSFUL - failed to translate the video {self.title}.")
             print(e)
+
         finally:
             semaphore.release() 
        
     def extract_emotions(self, semaphore) -> None:
         """
-        Translates the transcribed text into a given language.
+        Extracts the emotions from the transcribed .txt file of the video and saves it in a separate .txt file.
 
         Parameters:
-            lang_from: The original language of the text.
-            lang_to: The language to translate the text into.
-            lang_to_name: The name in English of the language that the text is to be translated into.    
+            semaphore = to restrict the number of videos that are processed at a time, for emotion extraction.    
             
         Returns:
             None
             
         """
         semaphore.acquire()
-        print(f"SUBTASK 5 :: started extracting emotions from the video {self.title}")
+        
         try:
+            print(f"SUBTASK 5 :: started extracting emotions from the video {self.title}")
+
             text_to_analyse = self.get_text_from_file()
             doc = nlp(text_to_analyse)
             full_text = ' '.join([sent.text for sent in doc.sents])
             emotion = NRCLex(full_text)
-            print(f"SUBTASK 5 :: Emotions and Frequencies for the video {self.title}: {emotion.affect_frequencies}")
+            emotion_output = emotion.affect_frequencies
+
+            print(f"SUBTASK 5 :: Emotions and Frequencies for the video {self.title}: {emotion_output}")
+            
+            self.emotions_path = os.path.join(self.folder_name, self.filename + "_emotions.txt")
+            print(f"SUBTASK 5 :: saving the emotions and frequencies to file: {self.emotions_path}")
+            with open(self.emotions_path, "w") as outfile:
+                print(emotion_output, file=outfile)
+                
         except Exception as e:
             print(f"UNSUCCESSFUL - failed to extract emotions from the video {self.title}.")
             print(e)
+
         finally:
             semaphore.release() 
         
@@ -243,11 +281,15 @@ class VideoFile:
 
     def save_to_file(self,filename,mode,text) -> None:
         """
+        Writes a given text to a file.
+
         Parameters:
-            
+            filename: Path of the file where the text is to be written.
+            mode: the mode in which to open the file.
+            text: the text that is to be saved in the file.
             
         Returns:
-            
+            None
         """
         with open(filename, mode) as file:
             file.write(text)
@@ -255,6 +297,17 @@ class VideoFile:
 
 
     def get_text_from_file(self) -> str:
+        """
+        Retrieves the transcribed text of each video.
+
+        Parameters:
+            None
+            
+        Returns:
+            the transcribed text of a video.
+        """
+
+        #if the text is not saved in the subtitles attribute of the videofile object then it is retrieved from the text file.
         if(self.subtitles == None):
             if(self.text_path == None):
                 raise Exception('Could not find the transcribed text of the video {self.title}') 
@@ -265,6 +318,3 @@ class VideoFile:
                 return text_to_analyse
         else:
             return self.subtitles
-
-    def to_string(self) -> None:
-        print(f"Video Details: \n\tURL: {self.url}\n\tTitle: {self.title}\n\tVideo path: {self.video_path} path: {self.audio_path}\n\tText file path: {self.text_path}\n\tSentiments of the video: {self.sentiment}")
