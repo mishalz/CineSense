@@ -1,6 +1,6 @@
 from VideoFile import VideoFile
 from parallel_executions import parallel_video_downloader, parallel_video_downloader_and_logger, parallel_audio_extractor, parallel_audio_transcriber, parallel_text_translator, parallel_emotion_extractor,parallel_sentiment_analyser
-from serial_executions import serial_video_downloader
+from serial_executions import serial_video_downloader,serial_audio_extractor
 from pathlib import Path
 
 #Task 2
@@ -39,12 +39,14 @@ if __name__=="__main__":
     for url in urls:
         videos.append(VideoFile(url))
     
-    parallel_video_downloader(videos,5)
-    parallel_audio_extractor(videos,1)
-    parallel_audio_transcriber(videos)
-    parallel_sentiment_analyser(videos)
-    parallel_text_translator(videos, 'en','es','Spanish')
-    parallel_emotion_extractor(videos)
+    parallel_data_folder = 'parallel_video_data/'
+    serial_data_folder = 'serial_video_data/'
+
+    parallel_video_downloader(videos,parallel_data_folder,5)
+    parallel_audio_extractor(videos)
+
+    serial_video_downloader(videos,serial_data_folder)
+    serial_audio_extractor(videos)
 
 
     # for video in videos:

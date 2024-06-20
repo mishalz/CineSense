@@ -21,7 +21,7 @@ def parallel_downloader_helper(videos,thread_builder,descriptive_text):
 
 # <-------------------------------- Parallel Functions ------------------------------->
 
-def parallel_video_downloader(videos,max_no_of_threads = None):
+def parallel_video_downloader(videos, data_folder, max_no_of_threads = None):
     """
     Parameters:
         filepath: the file containing the URLs of youtube videos
@@ -33,8 +33,8 @@ def parallel_video_downloader(videos,max_no_of_threads = None):
         max_no_of_threads = len(videos)
     semaphore = threading.Semaphore(max_no_of_threads)
 
-    def thread_builder(video,index):
-        thread = threading.Thread(target=video.download_video,args=(semaphore,index))
+    def thread_builder(video,_):
+        thread = threading.Thread(target=video.download_video,args=(data_folder,semaphore))
         return thread
 
     parallel_downloader_helper(videos,thread_builder,'download')
@@ -68,7 +68,7 @@ def parallel_audio_extractor(videos,max_no_of_threads = None):
         max_no_of_threads = len(videos)
     semaphore = threading.Semaphore(max_no_of_threads)
     def thread_builder(video,index):
-        thread = threading.Thread(target=video.extract_audio,args=(index,semaphore))
+        thread = threading.Thread(target=video.extract_audio,args=[semaphore])
         return thread
 
     parallel_downloader_helper(videos,thread_builder,'extract audio from')
@@ -87,7 +87,7 @@ def parallel_audio_transcriber(videos,max_no_of_threads=None):
 
     semaphore = threading.Semaphore(max_no_of_threads)
     def thread_builder(video,index):
-        thread = threading.Thread(target=video.transcribe_audio,args=(index,semaphore))
+        thread = threading.Thread(target=video.transcribe_audio,args=[semaphore])
         return thread
 
     parallel_downloader_helper(videos,thread_builder,'transcribe audio from')
@@ -105,7 +105,7 @@ def parallel_sentiment_analyser(videos, max_no_of_threads = None):
     semaphore = threading.Semaphore(max_no_of_threads)
 
     def thread_builder(video,index):
-        thread = threading.Thread(target=video.sentiment_analysis,args=(index,semaphore))
+        thread = threading.Thread(target=video.sentiment_analysis,args=[semaphore])
         return thread
 
     parallel_downloader_helper(videos,thread_builder,'perform sentiment analysis on')
@@ -124,7 +124,7 @@ def parallel_text_translator(videos, lang_from, lang_to, lang_name, max_no_of_th
     semaphore = threading.Semaphore(max_no_of_threads)
 
     def thread_builder(video,index):
-        thread = threading.Thread(target=video.translate_text,args=(index, lang_from, lang_to, lang_name,semaphore))
+        thread = threading.Thread(target=video.translate_text,args=( lang_from, lang_to, lang_name,semaphore))
         return thread
 
     parallel_downloader_helper(videos,thread_builder,f'translate in {lang_name}')
@@ -143,7 +143,7 @@ def parallel_emotion_extractor(videos,max_no_of_threads =None):
     semaphore = threading.Semaphore(max_no_of_threads)
 
     def thread_builder(video,index):
-        thread = threading.Thread(target=video.extract_emotions,args=(index, semaphore))
+        thread = threading.Thread(target=video.extract_emotions,args=[semaphore])
         return thread
 
     parallel_downloader_helper(videos,thread_builder,'extract emotion from')
