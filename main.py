@@ -1,6 +1,9 @@
 from VideoFile import VideoFile
-from parallel_executions import parallel_video_downloader, parallel_video_downloader_and_logger, parallel_audio_extractor_with_processes, parallel_audio_extractor_with_concurrency, parallel_audio_extractor_with_threads, parallel_audio_transcriber_with_processes,parallel_audio_transcriber_with_threads, parallel_text_translator, parallel_emotion_extractor,parallel_sentiment_analyser
 from serial_executions import serial_video_downloader,serial_audio_extractor
+import process_executions
+import threads_executions
+import concurrent_executions
+
 
 def read_urls(filepath):
     """
@@ -32,10 +35,10 @@ if __name__=="__main__":
     serial_data_folder = 'serial_video_data/'
 
     #------- Task 3 and Task 5: Comparison ----------
-    parallel_video_downloader(videos,parallel_data_folder,5)
-    # parallel_audio_extractor_with_threads(videos,1)
-    # parallel_audio_extractor_with_processes(videos)
-    parallel_audio_extractor_with_concurrency(videos)
+    threads_executions.parallel_video_downloader(videos,parallel_data_folder,5)
+    threads_executions.parallel_audio_extractor(videos,1)
+    # process_executions.parallel_audio_extractor(videos)
+    # concurrent_executions.parallel_audio_extractor(videos)
 
     # serial_video_downloader(videos,serial_data_folder)
     # serial_audio_extractor(videos)
@@ -44,7 +47,7 @@ if __name__=="__main__":
     # parallel_video_downloader_and_logger(videos,'download_log.txt',parallel_data_folder)
     
     #-------------- Task 5: Subtasks -----------------
-    # parallel_audio_transcriber_with_threads(videos)
+    concurrent_executions.parallel_audio_transcriber(videos)
     # parallel_audio_transcriber_with_processes(videos)
 
     # parallel_sentiment_analyser(videos)

@@ -9,13 +9,15 @@ from deep_translator import GoogleTranslator
 import spacy
 import nltk
 from nrclex import NRCLex
+import threading
+from typing import Optional
 
 nlp = spacy.load('en_core_web_sm')
 # nltk.download('punkt')
 
 class VideoFile:
 
-    def __init__(self, url) -> None:
+    def __init__(self, url:str) -> None:
         """
         Initialised the VideoFile object with attributes: URL, title, path where the video is downloaded, path of the file with the 
         extracted audio subtitles of the video, path of the text file where the subtitles of the video are stored, path of the file 
@@ -28,22 +30,22 @@ class VideoFile:
             None
             
         """
-        self.url = url
-        self.title = None
-        self.filename = None
-        self.folder_name = None
-        self.video_path = None
-        self.audio_path = None
-        self.subtitles = None
-        self.text_path = None
-        self.translated_text_path = None
-        self.sentiments_path = None
-        self.emotions_path = None
-        self.sentiment = {}
+        self.url:str = url
+        self.title:str = None
+        self.filename:str = None
+        self.folder_name:str = None
+        self.video_path:str = None
+        self.audio_path:str = None
+        self.subtitles:str = None
+        self.text_path:str = None
+        self.translated_text_path:str = None
+        self.sentiments_path:str = None
+        self.emotions_path:str = None
+        self.sentiment:tuple = {}
  
  # <-------------------------------- Video Downloading Functions ------------------------------->
 
-    def download_video(self, data_folder,semaphore = None) -> None:
+    def download_video(self, data_folder:str,semaphore:Optional[threading.Semaphore] = None) -> None:
         """
         Downloads a video from YouTube.
 
@@ -75,7 +77,7 @@ class VideoFile:
             if(semaphore!=None):
                 semaphore.release()
 
-    def download_video_and_log(self, filename, data_folder, lock, thread_id) -> None:
+    def download_video_and_log(self, filename:str, data_folder:str, lock:threading.Lock, thread_id:int) -> None:
         """
         Downloads a video from YouTube and logs the activity in the logger file.
 
@@ -107,7 +109,7 @@ class VideoFile:
 # <-------------------------------- Video Analysis Sub Tasks ------------------------------->
 
 
-    def extract_audio(self,semaphore = None) -> None:
+    def extract_audio(self,semaphore:Optional[threading.Semaphore] = None) -> None:
         """
         Extracts the audio from the video file and saves it into a .wav file.
 
@@ -135,7 +137,7 @@ class VideoFile:
             if(semaphore != None):
                 semaphore.release()
      
-    def transcribe_audio(self, semaphore = None) -> None:
+    def transcribe_audio(self, semaphore:Optional[threading.Semaphore] = None) -> None:
         """
         Extracts the text from the audio file and saves it into a .txt file.
 
@@ -154,6 +156,7 @@ class VideoFile:
             recognizer = sr.Recognizer()
             with sr.AudioFile(self.audio_path) as source:
                 audio = recognizer.record(source)
+            print(audio)
             self.subtitles = recognizer.recognize_google(audio)
             self.text_path = os.path.join(self.folder_name, self.filename + ".txt")
 
@@ -170,7 +173,7 @@ class VideoFile:
             if(semaphore != None):
                 semaphore.release()
 
-    def sentiment_analysis(self,semaphore) -> None:
+    def sentiment_analysis(self,semaphore:Optional[threading.Semaphore] = None) -> None:
         """
         Performs Sentiment Analysis on the video and saves the polarity and subjectivity measure of the content, into a .txt file.
 
@@ -181,7 +184,8 @@ class VideoFile:
             None
             
         """
-        semaphore.acquire()
+        if(semaphore != None):
+            semaphore.acquire()
 
         try:
             print(f"SUBTASK 3 :: started sentiment analysis on file {self.title}")
@@ -203,9 +207,10 @@ class VideoFile:
             print(e)
         
         finally:
-            semaphore.release() 
+            if(semaphore != None):
+                semaphore.release()
 
-    def translate_text(self, lang_from, lang_to, lang_to_name, semaphore) -> None:
+    def translate_text(self, lang_from:str, lang_to:str, lang_to_name:str, semaphore:Optional[threading.Semaphore] = None) -> None:
         """
         Translates the transcribed text into a given language and saves it in a .txt file.
 
@@ -219,8 +224,8 @@ class VideoFile:
             None
             
         """
-        semaphore.acquire()
-
+        if(semaphore != None):
+            semaphore.acquire()
         try:
             print(f"SUBTASK 4 :: started translating the video {self.title} to {lang_to_name}")
 
@@ -238,9 +243,10 @@ class VideoFile:
             print(e)
 
         finally:
-            semaphore.release() 
+            if(semaphore != None):
+                semaphore.release()
        
-    def extract_emotions(self, semaphore) -> None:
+    def extract_emotions(self, semaphore:Optional[threading.Semaphore] = None) -> None:
         """
         Extracts the emotions from the transcribed .txt file of the video and saves it in a separate .txt file.
 
@@ -251,8 +257,8 @@ class VideoFile:
             None
             
         """
-        semaphore.acquire()
-        
+        if(semaphore != None):
+            semaphore.acquire()        
         try:
             print(f"SUBTASK 5 :: started extracting emotions from the video {self.title}")
 
@@ -274,12 +280,13 @@ class VideoFile:
             print(e)
 
         finally:
-            semaphore.release() 
+            if(semaphore != None):
+                semaphore.release()
         
 
 # <-------------------------------- Helper Functions ------------------------------->
 
-    def save_to_file(self,filename,mode,text) -> None:
+    def save_to_file(self,filename:str,mode:str,text:str) -> None:
         """
         Writes a given text to a file.
 

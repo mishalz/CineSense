@@ -1,10 +1,11 @@
 import time
 import threading
 from VideoFile import VideoFile
+from typing import Callable, Optional
 
 # <-------------------------------- Helper Function ------------------------------->
 
-def parallel_downloader_helper(videos:list[VideoFile],thread_builder:function,descriptive_text:str) -> None:
+def parallel_downloader_helper(videos:list[VideoFile],thread_builder:Callable[[VideoFile,int],threading.Thread],descriptive_text:str) -> None:
     """
     A helper function that creates threads/process for each video and joins them.
 
@@ -33,7 +34,7 @@ def parallel_downloader_helper(videos:list[VideoFile],thread_builder:function,de
 
 # <-------------------------------- Parallel Downloading Functions ------------------------------->
 
-def parallel_video_downloader(videos:list[VideoFile], data_folder:str, max_no_of_threads:int = None) -> None:
+def parallel_video_downloader(videos:list[VideoFile], data_folder:str, max_no_of_threads:Optional[int] = None) -> None:
     """
     Downloads an array of videos provided, using threads.
 
@@ -83,7 +84,7 @@ def parallel_video_downloader_and_logger(videos: list[VideoFile], filename: str,
 
 # <-------------------------------- Parallel Analysis Functions ------------------------------->
 
-def parallel_audio_extractor(videos: list[VideoFile],max_no_of_threads: int = None) -> None:
+def parallel_audio_extractor(videos: list[VideoFile],max_no_of_threads: Optional[int] = None) -> None:
     """
     Extracts the audios of all VideoFile objects using threads for parallelism.
 
@@ -106,7 +107,9 @@ def parallel_audio_extractor(videos: list[VideoFile],max_no_of_threads: int = No
 
     parallel_downloader_helper(videos,thread_builder,'extract audio from')
 
-def parallel_audio_transcriber(videos: list[VideoFile], max_no_of_threads:int = None) -> None:
+
+
+def parallel_audio_transcriber(videos: list[VideoFile], max_no_of_threads: Optional[int] = None) -> None:
     """
     Transcribes the audios of all VideoFile objects using threads for parallelism.
 
@@ -122,13 +125,15 @@ def parallel_audio_transcriber(videos: list[VideoFile], max_no_of_threads:int = 
 
     semaphore = threading.Semaphore(max_no_of_threads)
     
-    def thread_builder(video:VideoFile,_):
+    def thread_builder(video: VideoFile,_):
         thread = threading.Thread(target=video.transcribe_audio,args=[semaphore])
         return thread
 
     parallel_downloader_helper(videos,thread_builder,'transcribe audio from')
 
-def parallel_sentiment_analyser(videos, max_no_of_threads = None) -> None:
+
+
+def parallel_sentiment_analyser(videos: list[VideoFile], max_no_of_threads: Optional[int] = None) -> None:
     """
     Performs sentiment analysis on all VideoFile objects using threads for parallelism.
 
@@ -145,13 +150,13 @@ def parallel_sentiment_analyser(videos, max_no_of_threads = None) -> None:
 
     semaphore = threading.Semaphore(max_no_of_threads)
 
-    def thread_builder(video,_):
+    def thread_builder(video: VideoFile,_):
         thread = threading.Thread(target=video.sentiment_analysis,args=[semaphore])
         return thread
 
     parallel_downloader_helper(videos,thread_builder,'perform sentiment analysis on')
       
-def parallel_text_translator(videos, lang_from, lang_to, lang_name, max_no_of_threads=None) -> None:
+def parallel_text_translator(videos: list[VideoFile], lang_from: str, lang_to: str, lang_name: str, max_no_of_threads: Optional[int] = None) -> None:
     """
     Translates the transcribed text of all VideoFile objects using threads for parallelism.
 
@@ -170,13 +175,13 @@ def parallel_text_translator(videos, lang_from, lang_to, lang_name, max_no_of_th
     
     semaphore = threading.Semaphore(max_no_of_threads)
 
-    def thread_builder(video,_):
+    def thread_builder(video: VideoFile,_):
         thread = threading.Thread(target=video.translate_text,args=( lang_from, lang_to, lang_name,semaphore))
         return thread
 
     parallel_downloader_helper(videos,thread_builder,f'translate in {lang_name}')
       
-def parallel_emotion_extractor(videos, max_no_of_threads = None) -> None:
+def parallel_emotion_extractor(videos: list[VideoFile], max_no_of_threads: Optional[int] = None) -> None:
     """
     Extracts the emotions of all VideoFile objects using threads for parallelism.
 
@@ -192,7 +197,7 @@ def parallel_emotion_extractor(videos, max_no_of_threads = None) -> None:
 
     semaphore = threading.Semaphore(max_no_of_threads)
 
-    def thread_builder(video,_):
+    def thread_builder(video: VideoFile,_):
         thread = threading.Thread(target=video.extract_emotions,args=[semaphore])
         return thread
 
