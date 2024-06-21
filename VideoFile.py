@@ -11,7 +11,7 @@ import nltk
 from nrclex import NRCLex
 
 nlp = spacy.load('en_core_web_sm')
-nltk.download('punkt')
+# nltk.download('punkt')
 
 class VideoFile:
 
@@ -135,7 +135,7 @@ class VideoFile:
             if(semaphore != None):
                 semaphore.release()
      
-    def transcribe_audio(self, semaphore) -> None:
+    def transcribe_audio(self, semaphore = None) -> None:
         """
         Extracts the text from the audio file and saves it into a .txt file.
 
@@ -146,7 +146,8 @@ class VideoFile:
             None
             
         """
-        semaphore.acquire()
+        if(semaphore != None):
+            semaphore.acquire()
         try:
             print(f"SUBTASK 2 :: started transcribing audio from file {self.audio_path} to text")
 
@@ -166,7 +167,8 @@ class VideoFile:
             print(e)
 
         finally:
-            semaphore.release()   
+            if(semaphore != None):
+                semaphore.release()
 
     def sentiment_analysis(self,semaphore) -> None:
         """
