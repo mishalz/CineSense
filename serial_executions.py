@@ -39,3 +39,22 @@ def serial_audio_extractor(videos: list[VideoFile]) -> None:
     end=time.perf_counter()
     
     print(f'Time took to extract audios from the videos serially: {round(end-start,2)} second(s)')
+
+def serial_audio_transcriber(videos: list[VideoFile]) -> None:
+    """
+    Transcribers audios from an array of VideoFile objects provided, one after another.
+
+    Parameters:
+        videos: the array of videos that are to be transcribed
+    
+    Returns:
+        None    
+    """
+    start=time.perf_counter()
+
+    for video in videos:
+        video.transcribe_audio()
+
+    end=time.perf_counter()
+    
+    print(f'Time took to transcribe audios from the videos serially: {round(end-start,2)} second(s)')

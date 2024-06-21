@@ -156,7 +156,6 @@ class VideoFile:
             recognizer = sr.Recognizer()
             with sr.AudioFile(self.audio_path) as source:
                 audio = recognizer.record(source)
-            print(audio)
             self.subtitles = recognizer.recognize_google(audio)
             self.text_path = os.path.join(self.folder_name, self.filename + ".txt")
 

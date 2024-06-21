@@ -1,5 +1,5 @@
 from VideoFile import VideoFile
-from serial_executions import serial_video_downloader,serial_audio_extractor
+import serial_executions
 import process_executions
 import threads_executions
 import concurrent_executions
@@ -34,25 +34,27 @@ if __name__=="__main__":
     parallel_data_folder = 'video_data/'
     serial_data_folder = 'serial_video_data/'
 
-    #------- Task 3 and Task 5: Comparison ----------
+    #------- Task 3 ----------
     threads_executions.parallel_video_downloader(videos,parallel_data_folder,5)
-    threads_executions.parallel_audio_extractor(videos,1)
-    # process_executions.parallel_audio_extractor(videos)
-    # concurrent_executions.parallel_audio_extractor(videos)
+    # threads_executions.parallel_audio_extractor(videos,1)
 
-    # serial_video_downloader(videos,serial_data_folder)
-    # serial_audio_extractor(videos)
+    # serial_executions.serial_video_downloader(videos,serial_data_folder)
+    serial_executions.serial_audio_extractor(videos)
 
     #-------------------- Task 4 ---------------------
-    # parallel_video_downloader_and_logger(videos,'download_log.txt',parallel_data_folder)
+    # threads_executions.parallel_video_downloader_and_logger(videos,'download_log.txt',parallel_data_folder)
     
     #-------------- Task 5: Subtasks -----------------
-    concurrent_executions.parallel_audio_transcriber(videos)
-    # parallel_audio_transcriber_with_processes(videos)
+    #comparing threads, processes and concurrent execution for audio transcriber
+    threads_executions.parallel_audio_transcriber(videos)
+    # process_executions.parallel_audio_transcriber(videos)
+    # serial_executions.serial_audio_transcriber(videos)
+    # concurrent_executions.parallel_audio_transcriber(videos)
 
-    # parallel_sentiment_analyser(videos)
-    # parallel_text_translator(videos,'en','es','Spanish')
-    # parallel_emotion_extractor(videos)
+    threads_executions.parallel_sentiment_analyser(videos)
+    threads_executions.parallel_text_translator(videos, 'en', 'es', 'Spanish')
+    threads_executions.parallel_emotion_extractor(videos)
+
 
 
 

@@ -31,7 +31,7 @@ def parallel_audio_transcriber(videos: list[VideoFile], max_no_of_threads: Optio
         print(f'Time took to transcribe audios from the videos in parallel [concurrency, processes]: {end - start} second(s)')
 
     except Exception as e:
-        print('Failed to {descriptive_text} concurrently.')
+        print('Failed to transcribe audios concurrently.')
         print(e)
 
 

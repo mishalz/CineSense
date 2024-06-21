@@ -84,7 +84,7 @@ def parallel_video_downloader_and_logger(videos: list[VideoFile], filename: str,
 
 # <-------------------------------- Parallel Analysis Functions ------------------------------->
 
-def parallel_audio_extractor(videos: list[VideoFile],max_no_of_threads: Optional[int] = None) -> None:
+def parallel_audio_extractor(videos: list[VideoFile], max_no_of_threads: Optional[int] = None) -> None:
     """
     Extracts the audios of all VideoFile objects using threads for parallelism.
 
@@ -156,6 +156,8 @@ def parallel_sentiment_analyser(videos: list[VideoFile], max_no_of_threads: Opti
 
     parallel_downloader_helper(videos,thread_builder,'perform sentiment analysis on')
       
+
+
 def parallel_text_translator(videos: list[VideoFile], lang_from: str, lang_to: str, lang_name: str, max_no_of_threads: Optional[int] = None) -> None:
     """
     Translates the transcribed text of all VideoFile objects using threads for parallelism.
@@ -180,6 +182,8 @@ def parallel_text_translator(videos: list[VideoFile], lang_from: str, lang_to: s
         return thread
 
     parallel_downloader_helper(videos,thread_builder,f'translate in {lang_name}')
+      
+
       
 def parallel_emotion_extractor(videos: list[VideoFile], max_no_of_threads: Optional[int] = None) -> None:
     """

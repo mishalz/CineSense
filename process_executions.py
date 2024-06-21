@@ -3,7 +3,7 @@ import multiprocessing
 import time
 from typing import Optional
 
-#defines a process helper function to call the extract_audio method on each video 
+#defines a process helper function to call the transcribe_audio method on each video 
 def audio_transcriber_helper(video:VideoFile):
         video.transcribe_audio()
 
@@ -14,7 +14,6 @@ def parallel_audio_transcriber(videos: list[VideoFile], max_no_of_threads:Option
     Parameters:
         videos: the array of VideoFile objects
         max_no_of_threads [optional]: to define the number of processes that could execute a function at one time.
-
 
     Returns:
         None    
