@@ -65,12 +65,12 @@ One important consideration while choosing amongst the executions has been that 
 
   However, if the project increases in scale, this decision might change.
   
-### 2. TranscribeAudio
+### 2. Transcribe Audio
    Analysing thread, process, concurrent and serial execution:
     The reason for choosing this subtask for the comparison was that it took the most time and seemed more CPU-intensive than other subtasks.
 This can also be proved by the fact that execution using processes or asynchronous processes took less time than threads. However, as discussed above, since each execution alters the same shared variable, processes do not work correctly, and therefore threads is considered as the most viable option.
 
-### 3. SentimentsAnalysis:
+### 3. Sentiments Analysis:
    Threads are used for executing this function due to the reason explained above, and there are no additional considerations or alterations to be discussed.
    
 ### 4. Text Translation: 
